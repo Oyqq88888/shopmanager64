@@ -34,10 +34,9 @@ export default {
         console.log(res)
         const {data: {data,meta: {msg, status}}} = res
         if (status === 200) {
-          this.$message({
-          message: '登陆成功',
-          type: 'success'
-        })
+            this.$router.push({
+              name: 'home'
+            })
         } else {
           this.$message.error('msg')
         }
