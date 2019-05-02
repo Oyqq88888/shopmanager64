@@ -27,7 +27,7 @@
               <i class="el-icon-location"></i>
               <span>用户管理</span>
             </template>
-            <el-menu-item index="1-1">
+            <el-menu-item index="users">
               <i class="el-icon-s-grid"></i>
               <span>用户列表</span>
             </el-menu-item>
@@ -94,7 +94,9 @@
 
         </el-menu>
       </el-aside>
-      <el-main class="main">Main</el-main>
+      <el-main class="main">
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -123,7 +125,7 @@ export default {
   background-color: #b3c0d1;
 }
 .aside {
-  background-color: pink;
+  /* background-color: pink; */
 }
 .main {
   background-color: blue;
