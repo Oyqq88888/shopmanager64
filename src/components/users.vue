@@ -19,11 +19,17 @@
     </el-row>
     <!-- 表格 -->
     <el-table :data="list" style="width: 100%">
-      <el-table-column prop="date" label="#" width="80"></el-table-column>
-      <el-table-column prop="date" label="姓名" width="130"></el-table-column>
-      <el-table-column prop="date" label="邮箱" width="140"></el-table-column>
-      <el-table-column prop="date" label="电话" width="140"></el-table-column>
-      <el-table-column prop="date" label="创建日期" width="140"></el-table-column>
+      <el-table-column prop="id" label="#" width="80"></el-table-column>
+      <el-table-column prop="username" label="姓名" width="130"></el-table-column>
+      <el-table-column prop="email" label="邮箱" width="140"></el-table-column>
+      <el-table-column prop="mobile" label="电话" width="140"></el-table-column>
+
+
+      <el-table-column label="创建日期" width="140">
+        <template slot-scope="scope">
+          {{scope.row.create_time | fmtdate}}
+        </template>
+      </el-table-column>
       <el-table-column prop="date" label="状态" width="140"></el-table-column>
       <el-table-column prop="date" label="操作" width="200"></el-table-column>
     </el-table>
@@ -38,7 +44,7 @@ export default {
     return {
       query: "",
       pagenum: 1,
-      pagesize: 2,
+      pagesize: 10,
       list:[]
     }
   },
@@ -51,7 +57,12 @@ export default {
       this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
 
       const res = await this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
-      console.log(res)
+      //console.log(res)
+      const {data,meta:{msg,status}} = res.data
+      if (status === 200) {
+        this.list = data.users
+        console.log(this.list)
+      }
     }
   }
 }
