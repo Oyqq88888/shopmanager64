@@ -78,7 +78,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisibleAd = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisibleAd = false">确 定</el-button>
+        <el-button type="primary" @click="addUsers()">确 定</el-button>
       </div>
     </el-dialog>
   </el-card>
@@ -106,9 +106,26 @@ export default {
     this.getTableData();
   },
   methods: {
+    //添加用户
+    async addUsers(){
+      const res = await this.$http.post('users',this.formdata)
+      console.log(res)
+      const {data,meta:{msg,status}} = res.data
+      if(status === 201){
+        //关闭对话框
+        this.dialogFormVisibleAd = false
+        //更新列表
+        this.getTableData()
+      }
+
+    },
+    // 添加对话框
     showAdd(){
+      //清空添加的信息
+      this.formdata = {}
       this.dialogFormVisibleAd = true
     },
+    //搜获-清空获取所有用户
     getAllUsers() {
       this.getTableData();
     },
@@ -136,7 +153,7 @@ export default {
           this.pagesize
         }`
       );
-      console.log(res);
+      //console.log(res);
       const {
         data,
         meta: { msg, status }
@@ -144,7 +161,7 @@ export default {
       if (status === 200) {
         this.total = data.total;
         this.list = data.users;
-        console.log(this.list);
+        //console.log(this.list);
       }
     }
   }
