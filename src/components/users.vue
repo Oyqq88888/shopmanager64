@@ -11,15 +11,18 @@
     <el-row class="searchBox">
       <el-col>
         <el-input
-        @clear="getAllUsers()"
-        clearable
-        placeholder="请输入内容" v-model="query" class="searchInput">
-          <el-button
-          @click="seaarchUsers()"
-          slot="append" icon="el-icon-search"></el-button>
+          @clear="getAllUsers()"
+          clearable
+          placeholder="请输入内容"
+          v-model="query"
+          class="searchInput"
+        >
+          <el-button @click="seaarchUsers()" slot="append" icon="el-icon-search"></el-button>
         </el-input>
         <!-- 添加 -->
-        <el-button type="success">添加用户</el-button>
+        <el-button
+        @click="showAdd()"
+        type="success">添加用户</el-button>
       </el-col>
     </el-row>
     <!-- 表格 -->
@@ -39,13 +42,11 @@
         </template>
       </el-table-column>
       <el-table-column prop="date" label="操作" width="200">
-
         <template slot-scope="scope">
           <el-button type="success" icon="el-icon-check" circle size="mini" plain></el-button>
           <el-button type="primary" icon="el-icon-edit" circle size="mini" plain></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="mini" plain></el-button>
         </template>
-
       </el-table-column>
     </el-table>
 
@@ -57,8 +58,29 @@
       :page-sizes="[2, 4, 6, 8]"
       :page-size="2"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="total">
-    </el-pagination>
+      :total="total"
+    ></el-pagination>
+    <!-- 对话框-- 添加表格 -->
+    <el-dialog title="添加用户" :visible.sync="dialogFormVisibleAd">
+      <el-form label-position="left" label-width="80px" :model="formdata">
+        <el-form-item label="用户名">
+          <el-input v-model="formdata.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="formdata.password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="formdata.email"></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="formdata.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisibleAd = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisibleAd = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -70,30 +92,40 @@ export default {
       pagenum: 1,
       pagesize: 2,
       total: -1,
-      list: []
+      list: [],
+      dialogFormVisibleAd: false,
+      formdata:{
+        username:'',
+        password:'',
+        email:'',
+        mobile:''
+      }
     };
   },
   created() {
     this.getTableData();
   },
   methods: {
-    getAllUsers(){
-      this.getTableData()
+    showAdd(){
+      this.dialogFormVisibleAd = true
     },
-    seaarchUsers(){
-      this.pagenum = 1
-      this.getTableData()
+    getAllUsers() {
+      this.getTableData();
+    },
+    seaarchUsers() {
+      this.pagenum = 1;
+      this.getTableData();
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
-      this.pagenum = 1
-      this.pagesize = val
-      this.getTableData()
+      this.pagenum = 1;
+      this.pagesize = val;
+      this.getTableData();
     },
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
-      this.pagenum = val
-      this.getTableData()
+      this.pagenum = val;
+      this.getTableData();
     },
     async getTableData() {
       const AUTH_TOKEN = localStorage.getItem("token");
@@ -104,13 +136,13 @@ export default {
           this.pagesize
         }`
       );
-      console.log(res)
+      console.log(res);
       const {
         data,
         meta: { msg, status }
       } = res.data;
       if (status === 200) {
-        this.total = data.total
+        this.total = data.total;
         this.list = data.users;
         console.log(this.list);
       }
