@@ -10,8 +10,13 @@
     <!-- 搜索+添加 -->
     <el-row class="searchBox">
       <el-col>
-        <el-input placeholder="请输入内容" v-model="query" class="searchInput">
-          <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-input
+        @clear="getAllUsers()"
+        clearable
+        placeholder="请输入内容" v-model="query" class="searchInput">
+          <el-button
+          @click="seaarchUsers()"
+          slot="append" icon="el-icon-search"></el-button>
         </el-input>
         <!-- 添加 -->
         <el-button type="success">添加用户</el-button>
@@ -72,6 +77,13 @@ export default {
     this.getTableData();
   },
   methods: {
+    getAllUsers(){
+      this.getTableData()
+    },
+    seaarchUsers(){
+      this.pagenum = 1
+      this.getTableData()
+    },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.pagenum = 1
