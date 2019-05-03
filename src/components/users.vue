@@ -45,6 +45,15 @@
     </el-table>
 
     <!-- 分页 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="pagenum"
+      :page-sizes="[2, 4, 6, 8]"
+      :page-size="2"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total">
+    </el-pagination>
   </el-card>
 </template>
 
@@ -54,7 +63,8 @@ export default {
     return {
       query: "",
       pagenum: 1,
-      pagesize: 10,
+      pagesize: 2,
+      total: -1,
       list: []
     };
   },
@@ -62,6 +72,17 @@ export default {
     this.getTableData();
   },
   methods: {
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+      this.pagenum = 1
+      this.pagesize = val
+      this.getTableData()
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`);
+      this.pagenum = val
+      this.getTableData()
+    },
     async getTableData() {
       const AUTH_TOKEN = localStorage.getItem("token");
       this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
@@ -71,12 +92,13 @@ export default {
           this.pagesize
         }`
       );
-      //console.log(res)
+      console.log(res)
       const {
         data,
         meta: { msg, status }
       } = res.data;
       if (status === 200) {
+        this.total = data.total
         this.list = data.users;
         console.log(this.list);
       }
