@@ -24,14 +24,24 @@
       <el-table-column prop="email" label="邮箱" width="140"></el-table-column>
       <el-table-column prop="mobile" label="电话" width="140"></el-table-column>
 
-
       <el-table-column label="创建日期" width="140">
+        <template slot-scope="scope">{{scope.row.create_time | fmtdate}}</template>
+      </el-table-column>
+
+      <el-table-column label="状态" width="140">
         <template slot-scope="scope">
-          {{scope.row.create_time | fmtdate}}
+          <el-switch v-model="scope.row.mg_state" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
         </template>
       </el-table-column>
-      <el-table-column prop="date" label="状态" width="140"></el-table-column>
-      <el-table-column prop="date" label="操作" width="200"></el-table-column>
+      <el-table-column prop="date" label="操作" width="200">
+
+        <template slot-scope="scope">
+          <el-button type="success" icon="el-icon-check" circle size="mini" plain></el-button>
+          <el-button type="primary" icon="el-icon-edit" circle size="mini" plain></el-button>
+          <el-button type="danger" icon="el-icon-delete" circle size="mini" plain></el-button>
+        </template>
+
+      </el-table-column>
     </el-table>
 
     <!-- 分页 -->
@@ -45,27 +55,34 @@ export default {
       query: "",
       pagenum: 1,
       pagesize: 10,
-      list:[]
-    }
+      list: []
+    };
   },
-  created(){
-    this.getTableData()
+  created() {
+    this.getTableData();
   },
   methods: {
-    async getTableData(){
-      const AUTH_TOKEN = localStorage.getItem('token')
-      this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
+    async getTableData() {
+      const AUTH_TOKEN = localStorage.getItem("token");
+      this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
 
-      const res = await this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
+      const res = await this.$http.get(
+        `users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${
+          this.pagesize
+        }`
+      );
       //console.log(res)
-      const {data,meta:{msg,status}} = res.data
+      const {
+        data,
+        meta: { msg, status }
+      } = res.data;
       if (status === 200) {
-        this.list = data.users
-        console.log(this.list)
+        this.list = data.users;
+        console.log(this.list);
       }
     }
   }
-}
+};
 </script>
 
 <style>
