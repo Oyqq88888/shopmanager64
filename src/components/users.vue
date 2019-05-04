@@ -20,9 +20,7 @@
           <el-button @click="seaarchUsers()" slot="append" icon="el-icon-search"></el-button>
         </el-input>
         <!-- 添加 -->
-        <el-button
-        @click="showAdd()"
-        type="success">添加用户</el-button>
+        <el-button @click="showAdd()" type="success">添加用户</el-button>
       </el-col>
     </el-row>
     <!-- 表格 -->
@@ -44,8 +42,22 @@
       <el-table-column prop="date" label="操作" width="200">
         <template slot-scope="scope">
           <el-button type="success" icon="el-icon-check" circle size="mini" plain></el-button>
-          <el-button type="primary" icon="el-icon-edit" circle size="mini" plain></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="mini" plain></el-button>
+          <el-button
+            @click="showEdit(scope.row)"
+            type="primary"
+            icon="el-icon-edit"
+            circle
+            size="mini"
+            plain
+          ></el-button>
+          <el-button
+            @click="showDel(scope.row)"
+            type="danger"
+            icon="el-icon-delete"
+            circle
+            size="mini"
+            plain
+          ></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -81,6 +93,25 @@
         <el-button type="primary" @click="addUsers()">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 对话框-- 编辑表格 -->
+    <el-dialog title="编辑用户" :visible.sync="dialogFormVisibleEdit">
+      <el-form label-position="left" label-width="80px" :model="formdata">
+        <el-form-item label="用户名">
+          <el-input v-model="formdata.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="formdata.email"></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="formdata.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisibleEdit = false">取 消</el-button>
+        <el-button type="primary" @click="editUsers()">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -94,11 +125,12 @@ export default {
       total: -1,
       list: [],
       dialogFormVisibleAd: false,
-      formdata:{
-        username:'',
-        password:'',
-        email:'',
-        mobile:''
+      dialogFormVisibleEdit: false,
+      formdata: {
+        username: "",
+        password: "",
+        email: "",
+        mobile: ""
       }
     };
   },
@@ -106,24 +138,66 @@ export default {
     this.getTableData();
   },
   methods: {
-    //添加用户
-    async addUsers(){
-      const res = await this.$http.post('users',this.formdata)
-      console.log(res)
-      const {data,meta:{msg,status}} = res.data
-      if(status === 201){
+    //编辑
+    async editUsers() {
+      const res = await this.$http.put(`users/${this.formdata.id}`,this.formdata);
+      console.log(res);
+      const {
+        meta: { msg, status }
+      } = res.data;
+      if (status === 200) {
         //关闭对话框
-        this.dialogFormVisibleAd = false
+        this.dialogFormVisibleEdit = false
         //更新列表
         this.getTableData()
       }
-
     },
-    // 添加对话框
-    showAdd(){
+    //显示编辑
+    showEdit(user) {
+      this.formdata = user;
+      this.dialogFormVisibleEdit = true;
+    },
+    showDel(user) {
+      console.log(user);
+      this.$confirm("此操作将永久?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(async () => {
+          const res = await this.$http.delete(`users/${user.id}`);
+          const {
+            meta: { msg, status }
+          } = res.data;
+          if (status === 200) {
+            this.$message.success(msg);
+            this.pagenum = 1
+            this.getTableData();
+          }
+        })
+        .catch(() => {
+          this.$message.info("取消");
+        });
+    },
+    //添加用户
+    async addUsers() {
+      const res = await this.$http.post("users", this.formdata);
+      console.log(res);
+      const {
+        meta: { msg, status }
+      } = res.data;
+      if (status === 201) {
+        //关闭对话框
+        this.dialogFormVisibleAd = false;
+        //更新列表
+        this.getTableData();
+      }
+    },
+    // 显示对话框
+    showAdd() {
       //清空添加的信息
-      this.formdata = {}
-      this.dialogFormVisibleAd = true
+      this.formdata = {};
+      this.dialogFormVisibleAd = true;
     },
     //搜获-清空获取所有用户
     getAllUsers() {
