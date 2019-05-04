@@ -36,12 +36,24 @@
 
       <el-table-column label="状态" width="140">
         <template slot-scope="scope">
-          <el-switch v-model="scope.row.mg_state" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          <el-switch
+            @change="changeUser(scope.row)"
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column prop="date" label="操作" width="200">
         <template slot-scope="scope">
-          <el-button type="success" icon="el-icon-check" circle size="mini" plain></el-button>
+          <el-button
+            @click="showSteRole(scope.row)"
+            type="success"
+            icon="el-icon-check"
+            circle
+            size="mini"
+            plain
+          ></el-button>
           <el-button
             @click="showEdit(scope.row)"
             type="primary"
@@ -112,6 +124,29 @@
         <el-button type="primary" @click="editUsers()">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 对话框 -分配角色 -->
+    <el-dialog title="分配角色" :visible.sync="dialogFormVisibleRole">
+      <el-form label-position="left" :model="formdata" label-width="80px">
+        <el-form-item label="用户名">{{formdata.username}}</el-form-item>
+
+        <el-form-item label="角色">
+          <!-- {{selectVal}} -->
+          <el-select v-model="selectVal" placeholder="请选角色名">
+            <el-option disabled label="请选择" :value="-1"></el-option>
+            <el-option
+            v-for="(item,i) in roles" :key="item.id"
+            :label="item.roleName" :value="item.id"></el-option>
+
+            <!--  -->
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
+        <el-button type="primary" @click="setRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -126,30 +161,69 @@ export default {
       list: [],
       dialogFormVisibleAd: false,
       dialogFormVisibleEdit: false,
+      dialogFormVisibleRole: false,
       formdata: {
         username: "",
         password: "",
         email: "",
         mobile: ""
-      }
+      },
+      selectVal:-1,
+      currUserId: -1,
+      roles: []
     };
   },
   created() {
     this.getTableData();
   },
   methods: {
+    //更改角色
+    async setRole(){
+      const res = await this.$http.put(`users/${this.currUserId}/role`,{
+        rid:this.selectVal
+      })
+      console.log(res)
+      this.dialogFormVisibleRole = false
+    },
+    //显示分配角色对话框
+    async showSteRole(user) {
+      //console.log(user)
+      this.formdata.username = user.username
+      this.currUserId = user.id
+      this.dialogFormVisibleRole = true
+
+      const res = await this.$http.get('roles')
+      //console.log(res)
+      this.roles = res.data.data
+
+      //给下拉列表 v-model 的select 赋值
+      //this.selectVal = 当前用户的角色id
+      const res2 = await this.$http.get(`users/${user.id}`)
+      this.selectVal = res2.data.data.rid
+    },
+    //修改用户状态
+    async changeUser(user) {
+      //console.log(user)
+      const res = await this.$http.put(
+        `users/${user.id}/state/${user.mg_state}`
+      );
+      console.log(res);
+    },
     //编辑
     async editUsers() {
-      const res = await this.$http.put(`users/${this.formdata.id}`,this.formdata);
+      const res = await this.$http.put(
+        `users/${this.formdata.id}`,
+        this.formdata
+      );
       console.log(res);
       const {
         meta: { msg, status }
       } = res.data;
       if (status === 200) {
         //关闭对话框
-        this.dialogFormVisibleEdit = false
+        this.dialogFormVisibleEdit = false;
         //更新列表
-        this.getTableData()
+        this.getTableData();
       }
     },
     //显示编辑
@@ -171,7 +245,7 @@ export default {
           } = res.data;
           if (status === 200) {
             this.$message.success(msg);
-            this.pagenum = 1
+            this.pagenum = 1;
             this.getTableData();
           }
         })
